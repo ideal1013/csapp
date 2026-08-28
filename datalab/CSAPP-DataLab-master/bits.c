@@ -139,7 +139,7 @@ NOTES:
  *   Rating: 1
  */
 int bitAnd(int x, int y) {
-  return 2;
+  return ~((~x)|(~y));
 }
 /* 
  * getByte - Extract byte n from word x
@@ -150,14 +150,11 @@ int bitAnd(int x, int y) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
-
-
-
-
-
-
-
-  return 2;
+  int mask = 0xff;
+  mask = mask << (n << 3);
+  int x &= mask;
+  x = x >> (n << 3);
+  return x;
 
 }
 /* 
@@ -169,7 +166,8 @@ int getByte(int x, int n) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-  return 2;
+  int mask = ~(~0 << (32+(~n+1)));
+  return x & mask;
 }
 /*
  * bitCount - returns count of number of 1's in word
@@ -179,7 +177,22 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
-  return 2;
+  int mask1 = 0x55, mask2 = 0x33, mask3 = 0x0f, mask4 = 0xff, mask5 = 0xff;
+  mask1 |= mask1<<8;
+  mask1 |= mask1<<16;
+  mask2 |= mask2<<8;
+  mask2 |= mask2<<16;
+  mask3 |= mask3<<8;
+  mask3 |= mask3<<16;
+  mask4 |= mask4<<16;
+  mask5 |= mask5<<8;
+
+  x = (x & mask1)+((x>>1) & mask1);
+  x = (x & mask2)+((x>>2) & mask2);
+  x = (x & mask3)+((x>>4) & mask3);
+  x = (x & mask4)+((x>>8) & mask4);
+  x = (x & mask5)+((x>>16) & mask5);
+  return x;
 }
 /* 
  * bang - Compute !x without using !
@@ -189,7 +202,12 @@ int bitCount(int x) {
  *   Rating: 4 
  */
 int bang(int x) {
-  return 2;
+  x |= x >> 16;
+  x |= x >> 8;
+  x |= x >> 4;
+  x |= x >> 2;
+  x |= x >> 1;
+  return (~x) & 1;
 }
 /* 
  * tmin - return minimum two's complement integer 
@@ -198,7 +216,7 @@ int bang(int x) {
  *   Rating: 1
  */
 int tmin(void) {
-  return 2;
+  return ;
 }
 /* 
  * fitsBits - return 1 if x can be represented as an 
