@@ -216,7 +216,7 @@ int bang(int x) {
  *   Rating: 1
  */
 int tmin(void) {
-  return ;
+  return 1<<31;
 }
 /* 
  * fitsBits - return 1 if x can be represented as an 
@@ -228,7 +228,8 @@ int tmin(void) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+  int mask = ~(-1 << n);
+  return !(x & mask);
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -239,7 +240,10 @@ int fitsBits(int x, int n) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+  int mask = 1<<31;
+  int neg = (x & mask);
+  int result = (x+ ((!neg)-1)&(((1<<n)-1))) >> n;
+  return result;
 }
 /* 
  * negate - return -x 
@@ -249,7 +253,7 @@ int divpwr2(int x, int n) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return ~x+1;
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
@@ -259,7 +263,9 @@ int negate(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+  int mask = 1<<31;
+  int neg = (x & mask);
+  return !neg+(!x);
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -269,7 +275,16 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+  int mask = 1<<31;
+  int xs = !(x & mask);
+  int ys = !(y & mask);
+  int yxs = !((x + (~y+1)) & mask);
+  int nxs = !xs;
+  int c1 = nxs & (!ys) & yxs;
+  int c2 = xs & ys & yxs;
+  int c3 = nxs & ys & yxs;
+  int c4 = nxs & ys & (!yxs);
+  return (c1+c2+c3+c4);
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
