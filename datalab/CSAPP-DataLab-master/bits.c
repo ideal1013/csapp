@@ -152,7 +152,7 @@ int bitAnd(int x, int y) {
 int getByte(int x, int n) {
   int mask = 0xff;
   mask = mask << (n << 3);
-  int x &= mask;
+  x &= mask;
   x = x >> (n << 3);
   return x;
 
@@ -228,7 +228,7 @@ int tmin(void) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  int mask = ~(-1 << n);
+  int mask = ~(~0 << n);
   return !(x & mask);
 }
 /* 
@@ -242,7 +242,7 @@ int fitsBits(int x, int n) {
 int divpwr2(int x, int n) {
   int mask = 1<<31;
   int neg = (x & mask);
-  int result = (x+ ((!neg)-1)&(((1<<n)-1))) >> n;
+  int result = (x + (((!neg)+(~0))&(((1<<n)+(~0))))) >> n;
   return result;
 }
 /* 
@@ -294,7 +294,32 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4
  */
 int ilog2(int x) {
-  return 2;
+  int mask1 = 0x55;
+  int mask2 = 0x33;
+  int mask3 = 0x0f;
+  int mask4 = 0xff;
+  int mask5 = 0xff;
+
+  x |= x >> 1;
+  x |= x >> 2;
+  x |= x >> 4;
+  x |= x >> 8;
+  x |= x >> 16;
+
+  mask1 |= mask1<<8;
+  mask1 |= mask1<<16;
+  mask2 |= mask2<<8;
+  mask2 |= mask2<<16;
+  mask3 |= mask3<<8;
+  mask3 |= mask3<<16;
+  mask4 |= mask4<<16;
+  mask5 |= mask5<<8;
+  x = (x & mask1)+((x>>1) & mask1);
+  x = (x & mask2)+((x>>2) & mask2);
+  x = (x & mask3)+((x>>4) & mask3);
+  x = (x & mask4)+((x>>8) & mask4);
+  x = (x & mask5)+((x>>16) & mask5);
+  return x+(~0);
 }
 /* 
  * float_neg - Return bit-level equivalent of expression -f for
@@ -308,7 +333,9 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+  int shift = 31;
+  if(((uf >> 23) & 0xf) == 0xf && !!(uf << 9)) shift = 0;
+  return uf ^ (1<<(shift));
 }
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x
@@ -320,7 +347,15 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-  return 2;
+  unsigned smask = 1<<31;
+  unsigned s = x & smask;
+  unsigned temp = x;
+  unsigned e = 30;
+  if(x == 0) return 0;
+  while(!(temp & smask) && !temp){
+    temp <<= 1;
+    e += ~0;
+  } 
 }
 /* 
  * float_twice - Return bit-level equivalent of expression 2*f for
@@ -334,5 +369,9 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
-  return 2;
+  unsigned s = uf & (1<<31);
+  unsigned e = uf & ((~0 << 23) ^ s);
+  unsigned f = uf & (~(~0 << 23));
+  if((e >> 23) != 0xf) e = ((e>>23)+1)<<23;
+  return s | e | f;
 }
