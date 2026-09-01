@@ -153,9 +153,8 @@ int getByte(int x, int n) {
   int mask = 0xff;
   mask = mask << (n << 3);
   x &= mask;
-  x = x >> (n << 3);
+  x = (x >> (n << 3)) & 0xff;
   return x;
-
 }
 /* 
  * logicalShift - shift x to the right by n, using a logical shift
@@ -166,8 +165,8 @@ int getByte(int x, int n) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-  int mask = ~(~0 << (32+(~n+1)));
-  return x & mask;
+  int mask = ~(~0 << (32+(~n+1)))+((!!n)+(~0);
+  return (x>>n) & mask;
 }
 /*
  * bitCount - returns count of number of 1's in word
@@ -228,8 +227,11 @@ int tmin(void) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  int mask = ~(~0 << n);
-  return !(x & mask);
+  int mask = ~0<<n;
+  int pos = !(x&mask);
+  int mask2 = mask>>1;
+  int neg = !((x&mask2)+(1<<n+(~0)));
+  return pos|neg+(!(x-0x20));
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -265,7 +267,7 @@ int negate(int x) {
 int isPositive(int x) {
   int mask = 1<<31;
   int neg = (x & mask);
-  return !neg+(!x);
+  return !neg+(!!x)+(~0);
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -278,7 +280,7 @@ int isLessOrEqual(int x, int y) {
   int mask = 1<<31;
   int xs = !(x & mask);
   int ys = !(y & mask);
-  int yxs = !((x + (~y+1)) & mask);
+  int yxs = !((y + (~x+1)) & mask);
   int nxs = !xs;
   int c1 = nxs & (!ys) & yxs;
   int c2 = xs & ys & yxs;
@@ -333,9 +335,9 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
-  int shift = 31;
-  if(((uf >> 23) & 0xf) == 0xf && !!(uf << 9)) shift = 0;
-  return uf ^ (1<<(shift));
+  int a = 1;
+  if(((uf >> 23) & 0xff) == 0xff && !!(uf << 9)) a = 0;
+  return uf ^ (a<<31);
 }
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x
@@ -370,8 +372,8 @@ unsigned float_i2f(int x) {
  */
 unsigned float_twice(unsigned uf) {
   unsigned s = uf & (1<<31);
-  unsigned e = uf & ((~0 << 23) ^ s);
+  unsigned e = uf & ((~0 << 23) + (1<<31));
   unsigned f = uf & (~(~0 << 23));
   if((e >> 23) != 0xf) e = ((e>>23)+1)<<23;
-  return s | e | f;
+  return (s | e | f) & (!(uf)-1) & (!(uf+(1<<31))-1) + ((!!(uf + (1<<31))-1)&uf);
 }
